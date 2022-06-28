@@ -1191,6 +1191,21 @@ input[type='checkbox'] {
 .tabs #tab-22 .list-unstyled {
 	margin-bottom: 1.75rem;
 }
+
+.tabs #tab-4 .list-unstyled .fas {
+	color: #14bf98;
+	font-size: 0.5rem;
+	line-height: 1.375rem;
+}
+
+.tabs #tab-4 .list-unstyled .media-body {
+	margin-left: 0.625rem;
+}
+
+.tabs #tab-4 .list-unstyled {
+	margin-bottom: 1.75rem;
+}
+
 .tabs .area-2 {
 	height: 27rem;
 	background: url('../images/view5.jpg') center center no-repeat;
