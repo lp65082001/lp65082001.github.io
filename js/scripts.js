@@ -169,176 +169,71 @@
     });
 
 
-    /* Call Me Form */
-    $("#callMeForm").validator().on("submit", function(event) {
-    	if (event.isDefaultPrevented()) {
-            // handle the invalid form...
-            lformError();
-            lsubmitMSG(false, "Please fill all fields!");
-        } else {
-            // everything looks good!
-            event.preventDefault();
-            lsubmitForm();
-        }
-    });
-
-    function lsubmitForm() {
-        // initiate variables with form content
-		var name = $("#lname").val();
-		var phone = $("#lphone").val();
-		var email = $("#lemail").val();
-		var select = $("#lselect").val();
-        var terms = $("#lterms").val();
-        
-        $.ajax({
-            type: "POST",
-            url: "php/callmeform-process.php",
-            data: "name=" + name + "&phone=" + phone + "&email=" + email + "&select=" + select + "&terms=" + terms, 
-            success: function(text) {
-                if (text == "success") {
-                    lformSuccess();
-                } else {
-                    lformError();
-                    lsubmitMSG(false, text);
-                }
-            }
-        });
-	}
-
-    function lformSuccess() {
-        $("#callMeForm")[0].reset();
-        lsubmitMSG(true, "Request Submitted!");
-        $("input").removeClass('notEmpty'); // resets the field label after submission
-    }
-
-    function lformError() {
-        $("#callMeForm").removeClass().addClass('shake animated').one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+    /* Generic Form Handler */
+    function formError(formId) {
+        $(formId).removeClass().addClass('shake animated').one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
             $(this).removeClass();
         });
-	}
-
-    function lsubmitMSG(valid, msg) {
-        if (valid) {
-            var msgClasses = "h3 text-center tada animated";
-        } else {
-            var msgClasses = "h3 text-center";
-        }
-        $("#lmsgSubmit").removeClass().addClass(msgClasses).text(msg);
     }
 
+    function submitMSG(msgId, valid, msg) {
+        var msgClasses = valid ? "h3 text-center tada animated" : "h3 text-center";
+        $(msgId).removeClass().addClass(msgClasses).text(msg);
+    }
 
-    /* Contact Form */
-    $("#contactForm").validator().on("submit", function(event) {
-    	if (event.isDefaultPrevented()) {
-            // handle the invalid form...
-            cformError();
-            csubmitMSG(false, "Please fill all fields!");
-        } else {
-            // everything looks good!
-            event.preventDefault();
-            csubmitForm();
-        }
-    });
-
-    function csubmitForm() {
-        // initiate variables with form content
-		var name = $("#cname").val();
-		var email = $("#cemail").val();
-        var message = $("#cmessage").val();
-        var terms = $("#cterms").val();
-        $.ajax({
-            type: "POST",
-            url: "php/contactform-process.php",
-            data: "name=" + name + "&email=" + email + "&message=" + message + "&terms=" + terms, 
-            success: function(text) {
-                if (text == "success") {
-                    cformSuccess();
-                } else {
-                    cformError();
-                    csubmitMSG(false, text);
-                }
+    function setupFormHandler(config) {
+        $(config.formId).validator().on("submit", function(event) {
+            if (event.isDefaultPrevented()) {
+                formError(config.formId);
+                submitMSG(config.msgId, false, "Please fill all fields!");
+            } else {
+                event.preventDefault();
+                var data = {};
+                $.each(config.fields, function(key, selector) {
+                    data[key] = $(selector).val();
+                });
+                $.ajax({
+                    type: "POST",
+                    url: config.url,
+                    data: data,
+                    timeout: 10000,
+                    success: function(text) {
+                        if (text === "success") {
+                            $(config.formId)[0].reset();
+                            submitMSG(config.msgId, true, config.successMsg);
+                            $("input").removeClass('notEmpty');
+                            if (config.hasTextarea) {
+                                $("textarea").removeClass('notEmpty');
+                            }
+                        } else {
+                            formError(config.formId);
+                            submitMSG(config.msgId, false, text);
+                        }
+                    },
+                    error: function() {
+                        formError(config.formId);
+                        submitMSG(config.msgId, false, "Network error. Please try again.");
+                    }
+                });
             }
         });
-	}
-
-    function cformSuccess() {
-        $("#contactForm")[0].reset();
-        csubmitMSG(true, "Message Submitted!");
-        $("input").removeClass('notEmpty'); // resets the field label after submission
-        $("textarea").removeClass('notEmpty'); // resets the field label after submission
     }
 
-    function cformError() {
-        $("#contactForm").removeClass().addClass('shake animated').one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
-            $(this).removeClass();
-        });
-	}
-
-    function csubmitMSG(valid, msg) {
-        if (valid) {
-            var msgClasses = "h3 text-center tada animated";
-        } else {
-            var msgClasses = "h3 text-center";
-        }
-        $("#cmsgSubmit").removeClass().addClass(msgClasses).text(msg);
-    }
-
-
-    /* Privacy Form */
-    $("#privacyForm").validator().on("submit", function(event) {
-    	if (event.isDefaultPrevented()) {
-            // handle the invalid form...
-            pformError();
-            psubmitMSG(false, "Please fill all fields!");
-        } else {
-            // everything looks good!
-            event.preventDefault();
-            psubmitForm();
-        }
+    setupFormHandler({
+        formId: '#callMeForm',
+        msgId: '#lmsgSubmit',
+        url: 'php/callmeform-process.php',
+        fields: { name: '#lname', phone: '#lphone', email: '#lemail', select: '#lselect', terms: '#lterms' },
+        successMsg: 'Request Submitted!'
     });
 
-    function psubmitForm() {
-        // initiate variables with form content
-		var name = $("#pname").val();
-		var email = $("#pemail").val();
-        var select = $("#pselect").val();
-        var terms = $("#pterms").val();
-        
-        $.ajax({
-            type: "POST",
-            url: "php/privacyform-process.php",
-            data: "name=" + name + "&email=" + email + "&select=" + select + "&terms=" + terms, 
-            success: function(text) {
-                if (text == "success") {
-                    pformSuccess();
-                } else {
-                    pformError();
-                    psubmitMSG(false, text);
-                }
-            }
-        });
-	}
-
-    function pformSuccess() {
-        $("#privacyForm")[0].reset();
-        psubmitMSG(true, "Request Submitted!");
-        $("input").removeClass('notEmpty'); // resets the field label after submission
-    }
-
-    function pformError() {
-        $("#privacyForm").removeClass().addClass('shake animated').one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
-            $(this).removeClass();
-        });
-	}
-
-    function psubmitMSG(valid, msg) {
-        if (valid) {
-            var msgClasses = "h3 text-center tada animated";
-        } else {
-            var msgClasses = "h3 text-center";
-        }
-        $("#pmsgSubmit").removeClass().addClass(msgClasses).text(msg);
-    }
+setupFormHandler({
+        formId: '#privacyForm',
+        msgId: '#pmsgSubmit',
+        url: 'php/privacyform-process.php',
+        fields: { name: '#pname', email: '#pemail', select: '#pselect', terms: '#pterms' },
+        successMsg: 'Request Submitted!'
+    });
     
 
     /* Back To Top Button */

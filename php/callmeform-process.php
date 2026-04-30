@@ -4,64 +4,53 @@ $errorMSG = "";
 if (empty($_POST["name"])) {
     $errorMSG = "Name is required ";
 } else {
-    $name = $_POST["name"];
+    $name = htmlspecialchars(strip_tags(trim($_POST["name"])));
 }
 
 if (empty($_POST["phone"])) {
     $errorMSG = "Phone is required ";
 } else {
-    $phone = $_POST["phone"];
+    $phone = htmlspecialchars(strip_tags(trim($_POST["phone"])));
 }
 
 if (empty($_POST["email"])) {
     $errorMSG = "Email is required ";
+} elseif (!filter_var($_POST["email"], FILTER_VALIDATE_EMAIL)) {
+    $errorMSG = "Invalid email format ";
 } else {
-    $email = $_POST["email"];
+    $email = filter_var($_POST["email"], FILTER_SANITIZE_EMAIL);
 }
 
 if (empty($_POST["select"])) {
     $errorMSG = "Select is required ";
 } else {
-    $select = $_POST["select"];
+    $select = htmlspecialchars(strip_tags(trim($_POST["select"])));
 }
 
 if (empty($_POST["terms"])) {
     $errorMSG = "Terms is required ";
 } else {
-    $terms = $_POST["terms"];
+    $terms = htmlspecialchars(strip_tags(trim($_POST["terms"])));
 }
 
 $EmailTo = "yourname@domain.com";
-$Subject = "New quote request from Aria landing page";
+$Subject = "New quote request from portfolio website";
 
-// prepare email body text
 $Body = "";
-$Body .= "Name: ";
-$Body .= $name;
-$Body .= "\n";
-$Body .= "Phone: ";
-$Body .= $phone;
-$Body .= "\n";
-$Body .= "Email: ";
-$Body .= $email;
-$Body .= "\n";
-$Body .= "Package: ";
-$Body .= $select;
-$Body .= "\n";
-$Body .= "Terms: ";
-$Body .= $terms;
-$Body .= "\n";
+$Body .= "Name: " . $name . "\n";
+$Body .= "Phone: " . $phone . "\n";
+$Body .= "Email: " . $email . "\n";
+$Body .= "Package: " . $select . "\n";
+$Body .= "Terms: " . $terms . "\n";
 
-// send email
-$success = mail($EmailTo, $Subject, $Body, "From:".$email);
-// redirect to success page
-if ($success && $errorMSG == ""){
-   echo "success";
-}else{
-    if($errorMSG == ""){
-        echo "Something went wrong :(";
-    } else {
-        echo $errorMSG;
-    }
+$headers = "From: noreply@lp65082001.github.io\r\n";
+$headers .= "Reply-To: " . $email . "\r\n";
+
+$success = mail($EmailTo, $Subject, $Body, $headers);
+
+if ($success && $errorMSG == "") {
+    echo "success";
+} else {
+    echo ($errorMSG == "") ? "Something went wrong :(" : $errorMSG;
 }
 ?>
